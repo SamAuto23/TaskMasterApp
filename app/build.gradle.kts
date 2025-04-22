@@ -1,6 +1,9 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp") version "1.9.10-1.0.13"
+
+
 }
 
 android {
@@ -57,6 +60,11 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
+
+
 
 
 }
