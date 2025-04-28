@@ -15,5 +15,9 @@ interface TaskDao {
     suspend fun deleteTask(task: Task)
 
     @Update
-    suspend fun updateTask(task: Task) // Added for editing support
+    suspend fun updateTask(task: Task)
+
+    // ✅ NEW: Get tasks for a specific date (for ReminderWorker)
+    @Query("SELECT * FROM Task WHERE date = :date")
+    fun getTasksForDate(date: String): List<Task>
 }

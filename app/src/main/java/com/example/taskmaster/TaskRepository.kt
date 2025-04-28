@@ -10,5 +10,8 @@ class TaskRepository(private val taskDao: TaskDao) {
 
     suspend fun deleteTask(task: Task) = taskDao.deleteTask(task)
 
-    suspend fun updateTask(task: Task) = taskDao.updateTask(task) // ✅ Added
+    suspend fun updateTask(task: Task) = taskDao.updateTask(task)
+
+    // ✅ Removed redundant suspend
+    fun getTasksForDate(date: String): List<Task> = taskDao.getTasksForDate(date)
 }

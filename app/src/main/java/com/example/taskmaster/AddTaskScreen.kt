@@ -5,31 +5,28 @@ import android.app.TimePickerDialog
 import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import java.util.*
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTaskScreen(
+    viewModel: TaskViewModel,
     onSaveClick: () -> Unit,
     onBackClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val db = TaskDatabase.getDatabase(context)
-    val taskDao = db.taskDao()
-    val repository = TaskRepository(taskDao)
-    val factory = TaskViewModelFactory(repository)
-    val viewModel: TaskViewModel = viewModel(factory = factory)
 
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -52,10 +49,20 @@ fun AddTaskScreen(
             Button(
                 onClick = {
                     if (title.isNotBlank() && dueDate.isNotBlank() && dueTime.isNotBlank()) {
+                        val formattedDate = try {
+                            val parts = dueDate.split("/")
+                            val day = parts[0].padStart(2, '0')
+                            val month = parts[1].padStart(2, '0')
+                            val year = parts[2]
+                            "$day/$month/$year"
+                        } catch (e: Exception) {
+                            dueDate
+                        }
+
                         val task = Task(
                             title = title,
                             description = description,
-                            date = dueDate,
+                            date = formattedDate, // ✅ Correct format for saving
                             time = dueTime,
                             priority = priority
                         )
