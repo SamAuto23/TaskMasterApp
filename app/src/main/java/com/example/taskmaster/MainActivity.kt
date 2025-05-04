@@ -2,6 +2,8 @@ package com.example.taskmaster
 
 import android.os.Build
 import android.os.Bundle
+import android.net.Uri
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
@@ -13,6 +15,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.work.*
 import com.example.taskmaster.ui.theme.TaskMasterTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -30,6 +35,20 @@ class MainActivity : ComponentActivity() {
             TaskMasterTheme {
                 val navController = rememberNavController()
                 AppNavigation(navController)
+            }
+        }
+
+        // ✅ Query Content Provider in background to avoid IllegalStateException
+        CoroutineScope(Dispatchers.IO).launch {
+            val uri = Uri.parse("content://com.example.taskmaster.provider/tasks")
+            val cursor = contentResolver.query(uri, null, null, null, null)
+
+            cursor?.use {
+                while (it.moveToNext()) {
+                    val title = it.getString(it.getColumnIndexOrThrow("title"))
+                    val date = it.getString(it.getColumnIndexOrThrow("date"))
+                    Log.d("ContentProviderTest", "Title: $title, Date: $date")
+                }
             }
         }
     }

@@ -3,7 +3,7 @@ package com.example.taskmaster
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(tableName = "tasks")
 data class Task(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
@@ -11,5 +11,5 @@ data class Task(
     val date: String,
     val time: String,
     val priority: String,
-    val isCompleted: Boolean = false //
+    val isCompleted: Boolean = false
 )

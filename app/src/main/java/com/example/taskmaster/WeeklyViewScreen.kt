@@ -29,10 +29,7 @@ fun WeeklyViewScreen(
     val today = LocalDate.now()
     val weekStart = today.with(DayOfWeek.MONDAY)
 
-    val daysOfWeek = List(7) { i ->
-        weekStart.plusDays(i.toLong())
-    }
-
+    val daysOfWeek = List(7) { i -> weekStart.plusDays(i.toLong()) }
     val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
     Scaffold(
@@ -48,8 +45,8 @@ fun WeeklyViewScreen(
                 .padding(16.dp)
         ) {
             daysOfWeek.forEach { day ->
-                val formattedDay = day.format(dateFormatter).replace("/", "-") // ✅ fixed here
-                val taskCount = allTasks.count { it.date == day.format(dateFormatter) }
+                val formattedDay = day.format(dateFormatter)
+                val taskCount = allTasks.count { it.date == formattedDay }
                 val isToday = day == today
 
                 Row(
@@ -57,7 +54,12 @@ fun WeeklyViewScreen(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                         .clickable {
-                            navController.navigate("dayView/$formattedDay")
+                            if (isToday) {
+                                navController.navigate("task_list") // ✅ Go to HomeScreen if today
+                            } else {
+                                val routeFormattedDay = formattedDay.replace("/", "-")
+                                navController.navigate("dayView/$routeFormattedDay")
+                            }
                         }
                         .background(
                             if (isToday) Color(0xFFFFCDD2) else Color.Transparent,

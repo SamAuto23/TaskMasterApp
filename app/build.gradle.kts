@@ -10,11 +10,20 @@ android {
 
     defaultConfig {
         applicationId = "com.example.taskmaster"
-        minSdk = 26 // Updated to Android 8.0 (Oreo)
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // ✅ Room schema export location
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += mapOf(
+                    "room.schemaLocation" to "$projectDir/schemas"
+                )
+            }
+        }
     }
 
     buildFeatures {
@@ -49,11 +58,12 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
+    // ✅ Room dependencies
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
-    // NEW: Background work and notification support
+    // ✅ Background work manager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
@@ -64,6 +74,4 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
-
 }

@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- ✅ Permission required to show notifications on Android 13+ -->
+    <!-- ✅ Permission required for Android 13+ to show notifications -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
@@ -26,6 +26,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- ✅ Correct ContentProvider setup -->
+        <provider
+            android:name=".TaskProvider"
+            android:authorities="com.example.taskmaster.provider"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.READ_EXTERNAL_STORAGE"
+            tools:ignore="ExportedProvider" />
 
     </application>
 

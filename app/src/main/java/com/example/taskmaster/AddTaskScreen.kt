@@ -16,8 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import java.util.*
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,7 +60,7 @@ fun AddTaskScreen(
                         val task = Task(
                             title = title,
                             description = description,
-                            date = formattedDate, // ✅ Correct format for saving
+                            date = formattedDate,
                             time = dueTime,
                             priority = priority
                         )
@@ -103,9 +101,17 @@ fun AddTaskScreen(
                 Spacer(modifier = Modifier.width(16.dp))
                 OutlinedButton(onClick = {
                     val calendar = Calendar.getInstance()
-                    DatePickerDialog(context, { _: DatePicker, y, m, d ->
-                        dueDate = "$d/${m + 1}/$y"
-                    }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+                    val datePicker = DatePickerDialog(
+                        context,
+                        { _: DatePicker, y, m, d ->
+                            dueDate = "$d/${m + 1}/$y"
+                        },
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH)
+                    )
+                    datePicker.datePicker.minDate = calendar.timeInMillis // ✅ prevent past dates
+                    datePicker.show()
                 }) {
                     Text(if (dueDate.isEmpty()) "Select Date" else dueDate)
                     Spacer(Modifier.width(8.dp))
