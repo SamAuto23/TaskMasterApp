@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.work.*
+import com.example.taskmaster.com.example.taskmaster.ui.theme.OverdueTasksScreen
 import com.example.taskmaster.ui.theme.TaskMasterTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -90,7 +91,8 @@ fun AppNavigation(navController: NavHostController) {
                 viewModel = viewModel,
                 onAddClick = { navController.navigate("add_task") },
                 onEditClick = { taskId -> navController.navigate("edit_task/$taskId") },
-                onWeeklyViewClick = { navController.navigate("weekly_view") }
+                onWeeklyViewClick = { navController.navigate("weekly_view") },
+                onOverdueClick = { navController.navigate("overdue_tasks") }
             )
         }
 
@@ -101,6 +103,7 @@ fun AppNavigation(navController: NavHostController) {
                 onAddClick = { navController.navigate("add_task") },
                 onEditClick = { taskId -> navController.navigate("edit_task/$taskId") },
                 onWeeklyViewClick = { navController.navigate("weekly_view") },
+                onOverdueClick = { navController.navigate("overdue_tasks") },
                 selectedDate = selectedDate
             )
         }
@@ -139,6 +142,13 @@ fun AppNavigation(navController: NavHostController) {
                     onBackClick = { navController.popBackStack() }
                 )
             }
+        }
+
+        composable("overdue_tasks") {
+            OverdueTasksScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }

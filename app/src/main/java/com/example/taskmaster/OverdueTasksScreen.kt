@@ -1,18 +1,16 @@
-package com.example.taskmaster
+package com.example.taskmaster.com.example.taskmaster.ui.theme
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -20,53 +18,57 @@ import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.material3.SwipeToDismiss
+import com.example.taskmaster.Task
+import com.example.taskmaster.TaskCard
+import com.example.taskmaster.TaskViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
+fun OverdueTasksScreen(
     viewModel: TaskViewModel,
-    onAddClick: () -> Unit,
-    onEditClick: (Int) -> Unit,
-    onWeeklyViewClick: () -> Unit,
-    onOverdueClick: () -> Unit,
-    selectedDate: String? = null
+    onBackClick: () -> Unit
 ) {
     val tasks by viewModel.allTasks.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-    val todayDate = remember { LocalDate.now().format(formatter) }
-    val currentDate = selectedDate ?: todayDate
+    val today = LocalDate.now()
 
-    val isPast = remember(currentDate) {
-        val selected = LocalDate.parse(currentDate, formatter)
-        val today = LocalDate.now()
-        selected.isBefore(today)
-    }
+    val overdueTasks = tasks
+        .filter {
+            val taskDate = try {
+                LocalDate.parse(it.date, formatter)
+            } catch (e: Exception) {
+                null
+            }
+            taskDate != null && taskDate.isBefore(today)
+        }
+        .sortedWith(
+            compareBy<Task> {
+                when (it.priority) {
+                    "High" -> 0
+                    "Medium" -> 1
+                    "Low" -> 2
+                    else -> 3
+                }
+            }.thenByDescending {
+                LocalDate.parse(it.date, formatter)
+            }
+        )
 
     var recentlyDeletedTask by remember { mutableStateOf<Task?>(null) }
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Task Master", fontWeight = FontWeight.Bold) },
-                actions = {
-                    IconButton(onClick = onWeeklyViewClick) {
-                        Icon(
-                            imageVector = Icons.Default.CalendarToday,
-                            contentDescription = "Weekly View"
-                        )
+            TopAppBar(
+                title = { Text("Overdue Tasks") },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            if (!isPast) {
-                FloatingActionButton(onClick = onAddClick) {
-                    Text("+")
-                }
-            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
@@ -75,40 +77,18 @@ fun HomeScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            Text(
-                text = if (selectedDate == null) "Today's Tasks" else "Tasks for $currentDate",
-                fontSize = 18.sp,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            Button(
-                onClick = onOverdueClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp)
-            ) {
-                Text("View Overdue Tasks")
-            }
-
-            tasks
-                .filter { it.date == currentDate }
-                .sortedBy {
-                    when (it.priority) {
-                        "High" -> 0
-                        "Medium" -> 1
-                        "Low" -> 2
-                        else -> 3
-                    }
-                }
-                .forEach { task ->
+            if (overdueTasks.isEmpty()) {
+                Text("No overdue tasks!", modifier = Modifier.align(Alignment.CenterHorizontally))
+            } else {
+                overdueTasks.forEach { task ->
                     val dismissState = rememberDismissState(
                         confirmValueChange = {
-                            if (it == DismissValue.DismissedToEnd || it == DismissValue.DismissedToStart) {
+                            if (it == DismissValue.DismissedToStart || it == DismissValue.DismissedToEnd) {
                                 viewModel.deleteTask(task)
                                 recentlyDeletedTask = task
                                 coroutineScope.launch {
                                     val result = snackbarHostState.showSnackbar(
-                                        message = "Task deleted",
+                                        "Task deleted",
                                         actionLabel = "Undo"
                                     )
                                     if (result == SnackbarResult.ActionPerformed) {
@@ -142,7 +122,7 @@ fun HomeScreen(
                                     recentlyDeletedTask = task
                                     coroutineScope.launch {
                                         val result = snackbarHostState.showSnackbar(
-                                            message = "Task deleted",
+                                            "Task deleted",
                                             actionLabel = "Undo"
                                         )
                                         if (result == SnackbarResult.ActionPerformed) {
@@ -151,12 +131,13 @@ fun HomeScreen(
                                         }
                                     }
                                 },
-                                onClick = { onEditClick(task.id) }
+                                onClick = {}
                             )
                         },
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
+            }
         }
     }
 }

@@ -11,5 +11,6 @@ data class Task(
     val date: String,
     val time: String,
     val priority: String,
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
+    val tag: String = "" // ✅ New field added with default value
 )
