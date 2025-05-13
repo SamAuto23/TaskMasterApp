@@ -3,6 +3,8 @@ package com.example.taskmaster
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -43,6 +45,7 @@ fun WeeklyViewScreen(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             daysOfWeek.forEach { day ->
                 val formattedDay = day.format(dateFormatter)
@@ -55,7 +58,7 @@ fun WeeklyViewScreen(
                         .padding(vertical = 8.dp)
                         .clickable {
                             if (isToday) {
-                                navController.navigate("task_list") // ✅ Go to HomeScreen if today
+                                navController.navigate("task_list")
                             } else {
                                 val routeFormattedDay = formattedDay.replace("/", "-")
                                 navController.navigate("dayView/$routeFormattedDay")

@@ -7,6 +7,8 @@ import android.provider.CalendarContract
 import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
@@ -130,7 +132,8 @@ fun EditTaskScreen(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             OutlinedTextField(
@@ -209,6 +212,8 @@ fun EditTaskScreen(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(80.dp))
         }
     }
 }

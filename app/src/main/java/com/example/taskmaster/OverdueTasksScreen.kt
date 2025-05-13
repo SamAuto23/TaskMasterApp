@@ -2,6 +2,8 @@ package com.example.taskmaster.com.example.taskmaster.ui.theme
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -76,6 +78,7 @@ fun OverdueTasksScreen(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             if (overdueTasks.isEmpty()) {
                 Text("No overdue tasks!", modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -137,6 +140,7 @@ fun OverdueTasksScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
+                Spacer(modifier = Modifier.height(80.dp))
             }
         }
     }

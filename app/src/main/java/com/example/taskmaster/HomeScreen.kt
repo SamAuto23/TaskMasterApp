@@ -2,6 +2,8 @@ package com.example.taskmaster
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Delete
@@ -70,74 +72,47 @@ fun HomeScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        Column(
+        Box(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
-            Text(
-                text = if (selectedDate == null) "Today's Tasks" else "Tasks for $currentDate",
-                fontSize = 18.sp,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            Button(
-                onClick = onOverdueClick,
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp)
+                    .padding(16.dp)
+                    .align(Alignment.TopCenter)
             ) {
-                Text("View Overdue Tasks")
-            }
+                Text(
+                    text = if (selectedDate == null) "Today's Tasks" else "Tasks for $currentDate",
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
 
-            tasks
-                .filter { it.date == currentDate }
-                .sortedBy {
-                    when (it.priority) {
-                        "High" -> 0
-                        "Medium" -> 1
-                        "Low" -> 2
-                        else -> 3
-                    }
+                Button(
+                    onClick = onOverdueClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                ) {
+                    Text("View Overdue Tasks")
                 }
-                .forEach { task ->
-                    val dismissState = rememberDismissState(
-                        confirmValueChange = {
-                            if (it == DismissValue.DismissedToEnd || it == DismissValue.DismissedToStart) {
-                                viewModel.deleteTask(task)
-                                recentlyDeletedTask = task
-                                coroutineScope.launch {
-                                    val result = snackbarHostState.showSnackbar(
-                                        message = "Task deleted",
-                                        actionLabel = "Undo"
-                                    )
-                                    if (result == SnackbarResult.ActionPerformed) {
-                                        recentlyDeletedTask?.let(viewModel::addTask)
-                                        recentlyDeletedTask = null
-                                    }
-                                }
-                            }
-                            true
-                        }
-                    )
 
-                    SwipeToDismiss(
-                        state = dismissState,
-                        directions = setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart),
-                        background = {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Red),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
-                            }
-                        },
-                        dismissContent = {
-                            TaskCard(
-                                task = task,
-                                onDelete = {
+                tasks
+                    .filter { it.date == currentDate }
+                    .sortedBy {
+                        when (it.priority) {
+                            "High" -> 0
+                            "Medium" -> 1
+                            "Low" -> 2
+                            else -> 3
+                        }
+                    }
+                    .forEach { task ->
+                        val dismissState = rememberDismissState(
+                            confirmValueChange = {
+                                if (it == DismissValue.DismissedToEnd || it == DismissValue.DismissedToStart) {
                                     viewModel.deleteTask(task)
                                     recentlyDeletedTask = task
                                     coroutineScope.launch {
@@ -150,13 +125,50 @@ fun HomeScreen(
                                             recentlyDeletedTask = null
                                         }
                                     }
-                                },
-                                onClick = { onEditClick(task.id) }
-                            )
-                        },
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
+                                }
+                                true
+                            }
+                        )
+
+                        SwipeToDismiss(
+                            state = dismissState,
+                            directions = setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart),
+                            background = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Red),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                                }
+                            },
+                            dismissContent = {
+                                TaskCard(
+                                    task = task,
+                                    onDelete = {
+                                        viewModel.deleteTask(task)
+                                        recentlyDeletedTask = task
+                                        coroutineScope.launch {
+                                            val result = snackbarHostState.showSnackbar(
+                                                message = "Task deleted",
+                                                actionLabel = "Undo"
+                                            )
+                                            if (result == SnackbarResult.ActionPerformed) {
+                                                recentlyDeletedTask?.let(viewModel::addTask)
+                                                recentlyDeletedTask = null
+                                            }
+                                        }
+                                    },
+                                    onClick = { onEditClick(task.id) }
+                                )
+                            },
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
+
+                Spacer(modifier = Modifier.height(80.dp))
+            }
         }
     }
 }

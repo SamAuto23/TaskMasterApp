@@ -1,6 +1,8 @@
 package com.example.taskmaster
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.*
@@ -11,7 +13,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -25,7 +26,7 @@ fun DayViewScreen(
 ) {
     val tasks by viewModel.allTasks.collectAsState()
 
-    val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy") // ✅ fixed format here
+    val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
     val today = LocalDate.now().format(formatter)
 
     val isPast = try {
@@ -57,8 +58,9 @@ fun DayViewScreen(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
-            tasks.filter { it.date.replace("/", "-") == selectedDate } // ✅ compare correctly
+            tasks.filter { it.date.replace("/", "-") == selectedDate }
                 .sortedBy {
                     when (it.priority) {
                         "High" -> 0
@@ -74,13 +76,14 @@ fun DayViewScreen(
                         onClick = { /* no edit for now */ }
                     )
                 }
+            Spacer(modifier = Modifier.height(80.dp))
         }
     }
 }
 
 fun getDayOfWeek(dateString: String): String {
     return try {
-        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy") // ✅ fixed format here
+        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         val date = LocalDate.parse(dateString, formatter)
         date.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault())
     } catch (e: Exception) {
