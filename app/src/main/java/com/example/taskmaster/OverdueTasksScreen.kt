@@ -1,4 +1,9 @@
-package com.example.taskmaster.com.example.taskmaster.ui.theme
+// AI Debugging Declaration:
+// This file was debugged with help from ChatGPT to fix swipe-to-delete functionality,
+// ensure smooth task removal with undo, and maintain scroll behaviour for multiple tasks.
+// AI was only used for debugging support, not to write the complete file.
+
+package com.example.taskmaster
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,7 +23,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
-import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.DismissState
 import androidx.compose.material3.SwipeToDismiss
 import com.example.taskmaster.Task
 import com.example.taskmaster.TaskCard
@@ -84,25 +89,28 @@ fun OverdueTasksScreen(
                 Text("No overdue tasks!", modifier = Modifier.align(Alignment.CenterHorizontally))
             } else {
                 overdueTasks.forEach { task ->
-                    val dismissState = rememberDismissState(
-                        confirmValueChange = {
-                            if (it == DismissValue.DismissedToStart || it == DismissValue.DismissedToEnd) {
-                                viewModel.deleteTask(task)
-                                recentlyDeletedTask = task
-                                coroutineScope.launch {
-                                    val result = snackbarHostState.showSnackbar(
-                                        "Task deleted",
-                                        actionLabel = "Undo"
-                                    )
-                                    if (result == SnackbarResult.ActionPerformed) {
-                                        recentlyDeletedTask?.let(viewModel::addTask)
-                                        recentlyDeletedTask = null
+                    val dismissState = remember(task.id) {
+                        DismissState(
+                            initialValue = DismissValue.Default,
+                            confirmValueChange = { value ->
+                                if (value == DismissValue.DismissedToStart || value == DismissValue.DismissedToEnd) {
+                                    viewModel.deleteTask(task)
+                                    recentlyDeletedTask = task
+                                    coroutineScope.launch {
+                                        val result = snackbarHostState.showSnackbar(
+                                            "Task deleted",
+                                            actionLabel = "Undo"
+                                        )
+                                        if (result == SnackbarResult.ActionPerformed) {
+                                            recentlyDeletedTask?.let(viewModel::addTask)
+                                            recentlyDeletedTask = null
+                                        }
                                     }
-                                }
+                                    true
+                                } else false
                             }
-                            true
-                        }
-                    )
+                        )
+                    }
 
                     SwipeToDismiss(
                         state = dismissState,
@@ -114,7 +122,11 @@ fun OverdueTasksScreen(
                                     .background(Color.Red),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Delete",
+                                    tint = Color.White
+                                )
                             }
                         },
                         dismissContent = {
@@ -140,6 +152,7 @@ fun OverdueTasksScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
+
                 Spacer(modifier = Modifier.height(80.dp))
             }
         }

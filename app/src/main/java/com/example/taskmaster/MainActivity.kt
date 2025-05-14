@@ -14,12 +14,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.work.*
-import com.example.taskmaster.com.example.taskmaster.ui.theme.OverdueTasksScreen
 import com.example.taskmaster.ui.theme.TaskMasterTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
@@ -30,7 +28,14 @@ class MainActivity : ComponentActivity() {
             requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
         }
 
-        scheduleDailyReminder()
+        // TEMP: Trigger ReminderWorker in 5 seconds to test notification
+        val testRequest = OneTimeWorkRequestBuilder<ReminderWorker>()
+            .setInitialDelay(5, TimeUnit.SECONDS)
+            .build()
+        WorkManager.getInstance(this).enqueue(testRequest)
+
+        // Uncomment this after testing:
+        // scheduleDailyReminder()
 
         setContent {
             TaskMasterTheme {
@@ -39,11 +44,9 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // ✅ Query Content Provider in background to avoid IllegalStateException
         CoroutineScope(Dispatchers.IO).launch {
             val uri = Uri.parse("content://com.example.taskmaster.provider/tasks")
             val cursor = contentResolver.query(uri, null, null, null, null)
-
             cursor?.use {
                 while (it.moveToNext()) {
                     val title = it.getString(it.getColumnIndexOrThrow("title"))
@@ -55,12 +58,12 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun scheduleDailyReminder() {
-        val now = Calendar.getInstance()
-        val due = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 6)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            if (before(now)) add(Calendar.DAY_OF_MONTH, 1)
+        val now = java.util.Calendar.getInstance()
+        val due = java.util.Calendar.getInstance().apply {
+            set(java.util.Calendar.HOUR_OF_DAY, 6)
+            set(java.util.Calendar.MINUTE, 0)
+            set(java.util.Calendar.SECOND, 0)
+            if (before(now)) add(java.util.Calendar.DAY_OF_MONTH, 1)
         }
 
         val delay = due.timeInMillis - now.timeInMillis
@@ -139,7 +142,8 @@ fun AppNavigation(navController: NavHostController) {
                     viewModel = viewModel,
                     taskId = taskId,
                     onSaveClick = { navController.popBackStack() },
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = { navController.popBackStack() },
+                    navController = navController // ✅ fix passed here
                 )
             }
         }

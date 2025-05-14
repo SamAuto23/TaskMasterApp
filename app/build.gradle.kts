@@ -16,7 +16,7 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // ✅ Room schema export location
+        //  Room schema export location
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += mapOf(
@@ -58,12 +58,12 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
-    // ✅ Room dependencies
+    //  Room dependencies
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
-    // ✅ Background work manager
+    //  Background work manager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")

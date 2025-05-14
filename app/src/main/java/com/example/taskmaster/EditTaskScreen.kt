@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -29,7 +30,8 @@ fun EditTaskScreen(
     viewModel: TaskViewModel,
     taskId: Int,
     onSaveClick: () -> Unit,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    navController: NavController
 ) {
     val tasks by viewModel.allTasks.collectAsState()
     val context = LocalContext.current
@@ -44,11 +46,23 @@ fun EditTaskScreen(
     var dueTime by remember { mutableStateOf(originalTask?.time ?: "") }
     var priority by remember { mutableStateOf(originalTask?.priority ?: "High") }
 
+    var navigateAfterUpdate by remember { mutableStateOf(false) }
+
     if (originalTask == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Task not found.", style = MaterialTheme.typography.titleMedium)
         }
         return
+    }
+
+    if (navigateAfterUpdate) {
+        val formattedDate = dueDate.replace("/", "-")
+        val oldFormattedDate = originalTask.date.replace("/", "-")
+        LaunchedEffect(Unit) {
+            navController.navigate("dayView/$formattedDate") {
+                popUpTo("dayView/$oldFormattedDate") { inclusive = true }
+            }
+        }
     }
 
     Scaffold(
@@ -81,8 +95,9 @@ fun EditTaskScreen(
                             time = dueTime,
                             priority = priority
                         )
+
                         viewModel.updateTask(updatedTask)
-                        onSaveClick()
+                        navigateAfterUpdate = true
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -155,7 +170,7 @@ fun EditTaskScreen(
                 OutlinedButton(onClick = {
                     val calendar = Calendar.getInstance()
                     DatePickerDialog(context, { _: DatePicker, y, m, d ->
-                        dueDate = "$d/${m + 1}/$y"
+                        dueDate = String.format("%02d/%02d/%04d", d, m + 1, y)
                     }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).apply {
                         datePicker.minDate = calendar.timeInMillis
                     }.show()
@@ -217,3 +232,4 @@ fun EditTaskScreen(
         }
     }
 }
+

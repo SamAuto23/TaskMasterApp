@@ -1,3 +1,8 @@
+// AI Debugging Declaration:
+// This file was debugged with help from ChatGPT to add scroll functionality
+// for proper display of content in both portrait and landscape orientations.
+// AI was not used to write the full file — only to assist in resolving layout issues.
+
 package com.example.taskmaster
 
 import androidx.compose.foundation.background
