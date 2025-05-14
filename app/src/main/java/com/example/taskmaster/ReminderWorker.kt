@@ -16,17 +16,17 @@ class ReminderWorker(
         val repository = TaskRepository(db.taskDao())
 
         val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-        val today = LocalDate.now().format(formatter)
+        val yesterday = LocalDate.now().minusDays(1).format(formatter)
 
-        val highPriorityTasks = repository.getTasksForDate(today).filter {
+        val highPriorityTasks = repository.getTasksForDate(yesterday).filter {
             it.priority == "High" && !it.isCompleted
         }
 
         if (highPriorityTasks.isNotEmpty()) {
             NotificationHelper.showHighPriorityReminder(
                 context = applicationContext,
-                title = "High Priority Tasks Today",
-                message = "You have ${highPriorityTasks.size} important task(s) to complete!"
+                title = "High Priority Tasks from Yesterday",
+                message = "You have ${highPriorityTasks.size} unfinished high-priority task(s) from yesterday."
             )
         }
 

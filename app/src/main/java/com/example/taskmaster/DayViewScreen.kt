@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -45,13 +46,18 @@ fun DayViewScreen(
     val context = LocalContext.current
 
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-    val today = LocalDate.now().format(formatter)
+    val today = LocalDate.now()
 
-    val isPast = try {
-        LocalDate.parse(selectedDate, formatter).isBefore(LocalDate.parse(today, formatter))
+    val selected = try {
+        LocalDate.parse(selectedDate, formatter)
     } catch (e: Exception) {
-        false
+        today
     }
+
+    val startOfWeek = today.with(DayOfWeek.MONDAY)
+    val endOfWeek = today.with(DayOfWeek.SUNDAY)
+
+    val isInCurrentWeek = !selected.isBefore(startOfWeek) && !selected.isAfter(endOfWeek)
 
     var recentlyDeletedTask by remember { mutableStateOf<Task?>(null) }
 
@@ -98,7 +104,7 @@ fun DayViewScreen(
             )
         },
         floatingActionButton = {
-            if (!isPast) {
+            if (!selected.isBefore(today)) {
                 FloatingActionButton(onClick = { navController.navigate("add_task") }) {
                     Text("+")
                 }
@@ -158,7 +164,7 @@ fun DayViewScreen(
                             task = task,
                             onDelete = {},
                             onClick = {
-                                if (!isPast) {
+                                if (isInCurrentWeek) {
                                     navController.navigate("edit_task/${task.id}")
                                 }
                             },

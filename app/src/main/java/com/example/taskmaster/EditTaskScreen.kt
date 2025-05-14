@@ -22,6 +22,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -117,7 +119,13 @@ fun EditTaskScreen(
                                 val calendar = Calendar.getInstance()
                                 val parts = dueDate.split("/")
                                 val timeParts = dueTime.split(":")
-                                calendar.set(parts[2].toInt(), parts[1].toInt() - 1, parts[0].toInt(), timeParts[0].toInt(), timeParts[1].toInt())
+                                calendar.set(
+                                    parts[2].toInt(),
+                                    parts[1].toInt() - 1,
+                                    parts[0].toInt(),
+                                    timeParts[0].toInt(),
+                                    timeParts[1].toInt()
+                                )
 
                                 putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, calendar.timeInMillis)
                                 putExtra(CalendarContract.EXTRA_EVENT_END_TIME, calendar.timeInMillis + 60 * 60 * 1000)
@@ -197,7 +205,8 @@ fun EditTaskScreen(
                                 selectedMonth == now.get(Calendar.MONTH) + 1 &&
                                 selectedYear == now.get(Calendar.YEAR)
 
-                        if (isToday && (h < now.get(Calendar.HOUR_OF_DAY) || (h == now.get(Calendar.HOUR_OF_DAY) && m < now.get(Calendar.MINUTE)))) {
+                        if (isToday && (h < now.get(Calendar.HOUR_OF_DAY) ||
+                                    (h == now.get(Calendar.HOUR_OF_DAY) && m < now.get(Calendar.MINUTE)))) {
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar("You cannot pick a past time for today.")
                             }
@@ -232,4 +241,3 @@ fun EditTaskScreen(
         }
     }
 }
-

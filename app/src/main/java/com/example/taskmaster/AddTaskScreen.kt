@@ -7,6 +7,8 @@ import android.provider.CalendarContract
 import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
@@ -128,7 +130,8 @@ fun AddTaskScreen(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             OutlinedTextField(
@@ -149,17 +152,17 @@ fun AddTaskScreen(
                 Spacer(modifier = Modifier.width(16.dp))
                 OutlinedButton(onClick = {
                     val calendar = Calendar.getInstance()
-                    val datePicker = DatePickerDialog(
+                    DatePickerDialog(
                         context,
                         { _: DatePicker, y, m, d ->
-                            dueDate = "$d/${m + 1}/$y"
+                            dueDate = String.format("%02d/%02d/%04d", d, m + 1, y)
                         },
                         calendar.get(Calendar.YEAR),
                         calendar.get(Calendar.MONTH),
                         calendar.get(Calendar.DAY_OF_MONTH)
-                    )
-                    datePicker.datePicker.minDate = calendar.timeInMillis
-                    datePicker.show()
+                    ).apply {
+                        datePicker.minDate = calendar.timeInMillis
+                    }.show()
                 }) {
                     Text(if (dueDate.isEmpty()) "Select Date" else dueDate)
                     Spacer(Modifier.width(8.dp))
@@ -183,7 +186,8 @@ fun AddTaskScreen(
                                 selectedMonth == now.get(Calendar.MONTH) + 1 &&
                                 selectedYear == now.get(Calendar.YEAR)
 
-                        if (isToday && (h < now.get(Calendar.HOUR_OF_DAY) || (h == now.get(Calendar.HOUR_OF_DAY) && m < now.get(Calendar.MINUTE)))) {
+                        if (isToday && (h < now.get(Calendar.HOUR_OF_DAY) ||
+                                    (h == now.get(Calendar.HOUR_OF_DAY) && m < now.get(Calendar.MINUTE)))) {
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar("You cannot pick a past time for today.")
                             }
@@ -213,6 +217,8 @@ fun AddTaskScreen(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(80.dp))
         }
     }
 }
