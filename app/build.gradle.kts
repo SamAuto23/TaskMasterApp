@@ -58,12 +58,12 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
-    //  Room dependencies
+    //  Here is the room dependencies
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
-    //  Background work manager
+    //  Here is the background work manager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")

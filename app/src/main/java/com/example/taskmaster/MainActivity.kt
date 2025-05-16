@@ -18,7 +18,6 @@ import com.example.taskmaster.ui.theme.TaskMasterTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,14 +27,9 @@ class MainActivity : ComponentActivity() {
             requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
         }
 
-        // TEMP: Trigger ReminderWorker in 5 seconds to test notification
-        val testRequest = OneTimeWorkRequestBuilder<ReminderWorker>()
-            .setInitialDelay(5, TimeUnit.SECONDS)
-            .build()
-        WorkManager.getInstance(this).enqueue(testRequest)
-
-        // Uncomment this after testing:
-        // scheduleDailyReminder()
+        // Here we trigger the ReminderWorker every time app starts
+        val request = OneTimeWorkRequestBuilder<ReminderWorker>().build()
+        WorkManager.getInstance(this).enqueue(request)
 
         setContent {
             TaskMasterTheme {
@@ -68,8 +62,8 @@ class MainActivity : ComponentActivity() {
 
         val delay = due.timeInMillis - now.timeInMillis
 
-        val workRequest = PeriodicWorkRequestBuilder<ReminderWorker>(1, TimeUnit.DAYS)
-            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+        val workRequest = PeriodicWorkRequestBuilder<ReminderWorker>(1, java.util.concurrent.TimeUnit.DAYS)
+            .setInitialDelay(delay, java.util.concurrent.TimeUnit.MILLISECONDS)
             .build()
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
@@ -143,7 +137,7 @@ fun AppNavigation(navController: NavHostController) {
                     taskId = taskId,
                     onSaveClick = { navController.popBackStack() },
                     onBackClick = { navController.popBackStack() },
-                    navController = navController // ✅ fix passed here
+                    navController = navController
                 )
             }
         }

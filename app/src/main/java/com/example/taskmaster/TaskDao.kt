@@ -22,6 +22,17 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE date = :date")
     fun getTasksForDate(date: String): List<Task>
 
+    // Used for ContentProvider query access
+    @RawQuery(observedEntities = [Task::class])
+    fun queryTasksViaProvider(query: androidx.sqlite.db.SupportSQLiteQuery): Cursor
+
     @Query("SELECT * FROM tasks")
     fun getAllTasksCursor(): Cursor
+
+    @Insert
+    fun insertTaskViaProvider(task: Task): Long
+
+    @Delete
+    fun deleteTaskViaProvider(task: Task)
+
 }

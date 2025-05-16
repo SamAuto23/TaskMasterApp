@@ -19,7 +19,7 @@ object NotificationHelper {
     fun showHighPriorityReminder(context: Context, title: String, message: String) {
         createNotificationChannel(context)
 
-        // ✅ Check if permission is granted
+        // This is to  check if permission is granted
         if (ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.POST_NOTIFICATIONS

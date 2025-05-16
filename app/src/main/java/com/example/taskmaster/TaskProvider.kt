@@ -11,7 +11,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 class TaskProvider : ContentProvider() {
 
     companion object {
-        private const val AUTHORITY = "com.example.taskmaster.provider"
+        private const val AUTHORITY = "com.example.taskmaster"
         private const val TASKS_TABLE = "tasks"
         val CONTENT_URI: Uri = Uri.parse("content://$AUTHORITY/$TASKS_TABLE")
 
@@ -39,27 +39,58 @@ class TaskProvider : ContentProvider() {
             TASKS -> {
                 val sql = "SELECT * FROM tasks"
                 val query = SimpleSQLiteQuery(sql)
-                database.query(query)  // ✅ Runs safely without blocking UI thread
+                database.taskDao().queryTasksViaProvider(query)
             }
             else -> {
                 Log.e("TaskProvider", "Unknown URI: $uri")
-                null
+                throw IllegalArgumentException("Unknown URI: $uri")
             }
         }
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
-        // Not implemented
-        return null
-    }
-
-    override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<out String>?): Int {
-        // Not implemented
-        return 0
+        return when (uriMatcher.match(uri)) {
+            TASKS -> {
+                val task = Task(
+                    title = values?.getAsString("title") ?: "",
+                    description = values?.getAsString("description") ?: "",
+                    date = values?.getAsString("date") ?: "",
+                    time = values?.getAsString("time") ?: "",
+                    priority = values?.getAsString("priority") ?: "Low",
+                    isCompleted = values?.getAsBoolean("isCompleted") ?: false
+                )
+                val id = database.taskDao().insertTaskViaProvider(task)
+                Uri.withAppendedPath(CONTENT_URI, id.toString())
+            }
+            else -> {
+                Log.e("TaskProvider", "Insert: Unknown URI $uri")
+                throw IllegalArgumentException("Unknown URI: $uri")
+            }
+        }
     }
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int {
-        // Not implemented
+        return when (uriMatcher.match(uri)) {
+            TASKS -> {
+                0 // Not supported for all tasks
+            }
+            else -> {
+                val segments = uri.pathSegments
+                if (segments.size == 2 && segments[0] == TASKS_TABLE) {
+                    val id = segments[1].toIntOrNull()
+                    if (id != null) {
+                        val task = Task(id, "", "", "", "", "", false)
+                        database.taskDao().deleteTaskViaProvider(task)
+                        return 1
+                    }
+                }
+                Log.e("TaskProvider", "Delete: Invalid URI $uri")
+                throw IllegalArgumentException("Invalid URI: $uri")
+            }
+        }
+    }
+
+    override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<out String>?): Int {
         return 0
     }
 

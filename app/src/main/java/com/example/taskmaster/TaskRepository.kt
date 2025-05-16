@@ -12,6 +12,6 @@ class TaskRepository(private val taskDao: TaskDao) {
 
     suspend fun updateTask(task: Task) = taskDao.updateTask(task)
 
-    // ✅ Removed redundant suspend
+    // Removed the redundant suspend
     fun getTasksForDate(date: String): List<Task> = taskDao.getTasksForDate(date)
 }
